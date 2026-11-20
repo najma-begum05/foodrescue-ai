@@ -65,7 +65,7 @@ const connectDB = async () => {
 };
 
 // Start Server
-app.listen(PORT, async () => {
+app.listen(PORT, '127.0.0.1', async () => {
   console.log(`===============================================`);
   console.log(`🚀 FoodRescue AI Server listening on port ${PORT}`);
   console.log(`🌐 Base URL: http://localhost:${PORT}`);

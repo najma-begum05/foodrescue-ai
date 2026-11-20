@@ -321,57 +321,61 @@ export const optimizeMultiStopRoute = async (req, res) => {
       });
     });
 
-    // Try executing Python route optimizer
-    const pythonScript = path.resolve(__dirname, '../../ai/logistics/route_optimizer.py');
-    const py = spawn('python', [pythonScript, '--json', JSON.stringify(stops)]);
+    return new Promise((resolve) => {
+      // Try executing Python route optimizer
+      const pythonScript = path.resolve(__dirname, '../../ai/logistics/route_optimizer.py');
+      const py = spawn('python', [pythonScript, '--json', JSON.stringify(stops)]);
 
-    let stdout = '';
-    let stderr = '';
+      let stdout = '';
+      let stderr = '';
 
-    py.stdout.on('data', data => { stdout += data.toString(); });
-    py.stderr.on('data', data => { stderr += data.toString(); });
+      py.stdout.on('data', data => { stdout += data.toString(); });
+      py.stderr.on('data', data => { stderr += data.toString(); });
 
-    py.on('close', code => {
-      if (code === 0 && stdout.trim()) {
-        try {
-          const parsed = JSON.parse(stdout);
-          return res.json(parsed);
-        } catch {
-          // Fall through to js fallback
+      py.on('close', code => {
+        if (code === 0 && stdout.trim()) {
+          try {
+            const parsed = JSON.parse(stdout);
+            res.json(parsed);
+            return resolve();
+          } catch {
+            // Fall through to js fallback
+          }
         }
-      }
 
-      // JS Heuristic Fallback
-      let currentLat = 17.4156;
-      let currentLon = 78.4357;
-      let totalDist = 0;
-      const sequence = stops.map((st, i) => {
-        const leg = calculateHaversine(currentLat, currentLon, st.lat, st.lon);
-        totalDist += leg;
-        currentLat = st.lat;
-        currentLon = st.lon;
-        return {
-          ...st,
-          sequence: i + 1,
-          cumulativeKm: Math.round(totalDist * 10) / 10,
-          estimatedDurationMins: Math.round((totalDist / 25) * 60 + (i + 1) * 5)
-        };
-      });
+        // JS Heuristic Fallback
+        let currentLat = 17.4156;
+        let currentLon = 78.4357;
+        let totalDist = 0;
+        const sequence = stops.map((st, i) => {
+          const leg = calculateHaversine(currentLat, currentLon, st.lat, st.lon);
+          totalDist += leg;
+          currentLat = st.lat;
+          currentLon = st.lon;
+          return {
+            ...st,
+            sequence: i + 1,
+            cumulativeKm: Math.round(totalDist * 10) / 10,
+            estimatedDurationMins: Math.round((totalDist / 25) * 60 + (i + 1) * 5)
+          };
+        });
 
-      const baselineDist = Math.round(totalDist * 1.4 * 10) / 10;
-      const distSaved = Math.max(0, Math.round((baselineDist - totalDist) * 10) / 10);
-      const co2Saved = Math.round(distSaved * 0.192 * 10) / 10;
+        const baselineDist = Math.round(totalDist * 1.4 * 10) / 10;
+        const distSaved = Math.max(0, Math.round((baselineDist - totalDist) * 10) / 10);
+        const co2Saved = Math.round(distSaved * 0.192 * 10) / 10;
 
-      return res.json({
-        success: true,
-        stopCount: sequence.length,
-        optimizedSequence: sequence,
-        totalDistanceKm: Math.round(totalDist * 10) / 10,
-        estimatedMinutes: Math.round((totalDist / 25) * 60 + sequence.length * 5),
-        baselineDistanceKm: baselineDist,
-        distanceSavedKm: distSaved,
-        co2SavedKg: co2Saved,
-        recommendation: `Optimized multi-stop circuit visiting ${sequence.length} food locations. High urgency hot meals prioritized first.`
+        res.json({
+          success: true,
+          stopCount: sequence.length,
+          optimizedSequence: sequence,
+          totalDistanceKm: Math.round(totalDist * 10) / 10,
+          estimatedMinutes: Math.round((totalDist / 25) * 60 + sequence.length * 5),
+          baselineDistanceKm: baselineDist,
+          distanceSavedKm: distSaved,
+          co2SavedKg: co2Saved,
+          recommendation: `Optimized multi-stop circuit visiting ${sequence.length} food locations. High urgency hot meals prioritized first.`
+        });
+        resolve();
       });
     });
   } catch (err) {
