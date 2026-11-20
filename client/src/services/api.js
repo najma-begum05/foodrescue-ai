@@ -126,4 +126,16 @@ export const requestService = {
   }
 };
 
+// AI Engine API Wrappers (Module 6)
+export const aiService = {
+  getRecommendations: async () => {
+    const res = await api.get('/ai/recommendations');
+    return res.data;
+  },
+  evaluateMatch: async (listing, ngoCriteria) => {
+    const res = await api.post('/ai/evaluate', { listing, ngoCriteria });
+    return res.data;
+  }
+};
+
 export default api;

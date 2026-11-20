@@ -5,6 +5,7 @@ import mongoose from 'mongoose';
 import authRoutes from '../routes/authRoutes.js';
 import listingRoutes from '../routes/listingRoutes.js';
 import requestRoutes from '../routes/requestRoutes.js';
+import aiRoutes from '../routes/aiRoutes.js';
 
 // Load environment variables from .env
 dotenv.config();
@@ -46,6 +47,7 @@ app.get('/api/health', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/listings', listingRoutes);
 app.use('/api/requests', requestRoutes);
+app.use('/api/ai', aiRoutes);
 
 // Database connection helper (graceful connection)
 const connectDB = async () => {
@@ -69,6 +71,7 @@ app.listen(PORT, async () => {
   console.log(`🔐 Auth API: http://localhost:${PORT}/api/auth`);
   console.log(`🍲 Listings API: http://localhost:${PORT}/api/listings`);
   console.log(`🤝 Requests API: http://localhost:${PORT}/api/requests`);
+  console.log(`🧠 AI Engine API: http://localhost:${PORT}/api/ai`);
   console.log(`===============================================`);
   await connectDB();
 });

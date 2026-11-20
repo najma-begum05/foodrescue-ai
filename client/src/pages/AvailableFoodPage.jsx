@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { SAMPLE_FOOD_LISTINGS } from '../components/LiveFoodShowcase';
 import { listingService, requestService } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import AIMatchScoreModal from '../components/AIMatchScoreModal';
 import { 
   Search, 
   Filter, 
@@ -14,7 +15,8 @@ import {
   Package, 
   HeartHandshake, 
   RefreshCw,
-  AlertCircle
+  AlertCircle,
+  Info
 } from 'lucide-react';
 
 export default function AvailableFoodPage({ onOpenAuth }) {
@@ -34,6 +36,9 @@ export default function AvailableFoodPage({ onOpenAuth }) {
   const [submittingRequest, setSubmittingRequest] = useState(false);
   const [requestSuccessMsg, setRequestSuccessMsg] = useState(null);
   const [requestErrorMsg, setRequestErrorMsg] = useState(null);
+
+  // AI Breakdown inspect state
+  const [inspectListing, setInspectListing] = useState(null);
 
   const categories = ['All', 'Cooked Meals', 'Bakery', 'Fresh Produce', 'Dairy', 'Packaged Goods'];
   const urgencies = ['All', 'CRITICAL', 'URGENT', 'MODERATE', 'LOW'];
@@ -306,11 +311,17 @@ export default function AvailableFoodPage({ onOpenAuth }) {
                           {urgencyBadge.label}
                         </span>
                       </div>
+                      
+                      {/* Clickable AI Match Score Badge */}
                       <div className="absolute top-3 right-3">
-                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-extrabold bg-emerald-950/85 text-emerald-300 backdrop-blur-xs border border-emerald-500/30">
+                        <button
+                          onClick={() => setInspectListing(item)}
+                          title="Click to view AI Score breakdown"
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-extrabold bg-emerald-950/85 hover:bg-emerald-900 text-emerald-300 backdrop-blur-xs border border-emerald-500/30 transition shadow-sm cursor-pointer"
+                        >
                           <Sparkles className="w-3 h-3" />
                           {item.aiMatchScore}% Score
-                        </span>
+                        </button>
                       </div>
                     </div>
 
@@ -331,7 +342,7 @@ export default function AvailableFoodPage({ onOpenAuth }) {
                       {/* Quantity & Distance Pill */}
                       <div className="mt-3.5 grid grid-cols-2 gap-2 text-xs">
                         <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
-                          <span className="text-[10px] uppercase font-bold text-slate-400">Inventory</span>
+                          <span className="text-[10px] uppercase font-bold text-slate-400">Available</span>
                           <p className="font-bold text-slate-900 mt-0.5">{item.quantity} {item.unit}</p>
                         </div>
                         <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
@@ -357,17 +368,21 @@ export default function AvailableFoodPage({ onOpenAuth }) {
                   {/* Card Bottom CTA */}
                   <div className="p-5 pt-0">
                     <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
-                      <span className="text-xs text-slate-500 flex items-center gap-1">
-                        <MapPin className="w-3.5 h-3.5 text-slate-400" />
-                        <span className="truncate max-w-[140px]">{item.location}</span>
-                      </span>
+                      <button
+                        onClick={() => setInspectListing(item)}
+                        className="text-xs text-emerald-700 hover:text-emerald-800 font-bold flex items-center gap-1 cursor-pointer"
+                      >
+                        <Info className="w-3.5 h-3.5" />
+                        <span>AI Breakdown</span>
+                      </button>
+
                       {isAvailable ? (
                         <button
                           onClick={() => handleOpenRequestModal(item)}
                           className="px-4 py-2 text-xs font-bold rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white shadow-xs transition cursor-pointer flex items-center gap-1.5"
                         >
                           <HeartHandshake className="w-3.5 h-3.5" />
-                          <span>Request Donation</span>
+                          <span>Request Food</span>
                         </button>
                       ) : (
                         <span className="px-3 py-1.5 rounded-xl bg-slate-100 text-slate-500 font-semibold text-xs">
@@ -481,6 +496,18 @@ export default function AvailableFoodPage({ onOpenAuth }) {
             </div>
           </div>
         )}
+
+        {/* AI Match Score Breakdown Modal */}
+        <AIMatchScoreModal
+          isOpen={!!inspectListing}
+          listing={inspectListing}
+          scoreData={inspectListing ? {
+            matchScore: inspectListing.aiMatchScore,
+            distanceKm: inspectListing.distance,
+            explanation: inspectListing.matchReason
+          } : null}
+          onClose={() => setInspectListing(null)}
+        />
 
       </div>
     </div>
