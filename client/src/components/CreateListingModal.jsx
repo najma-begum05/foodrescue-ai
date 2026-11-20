@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { listingService } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { 
@@ -10,12 +10,12 @@ import {
   AlertCircle, 
   CheckCircle2, 
   Utensils, 
-  ShieldCheck,
+  ShieldCheck, 
   Calendar,
   Layers
 } from 'lucide-react';
 
-export default function CreateListingModal({ isOpen, onClose, onListingCreated }) {
+export default function CreateListingModal({ isOpen, onClose, onListingCreated, initialValues = null }) {
   const { user } = useAuth();
 
   const [foodName, setFoodName] = useState('');
@@ -37,6 +37,15 @@ export default function CreateListingModal({ isOpen, onClose, onListingCreated }
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState(null);
   const [successMsg, setSuccessMsg] = useState(null);
+
+  // Auto-fill from AI Forecast if provided
+  useEffect(() => {
+    if (initialValues) {
+      if (initialValues.category) handleCategoryChange(initialValues.category);
+      if (initialValues.quantity) setQuantity(initialValues.quantity);
+      if (initialValues.foodName) setFoodName(initialValues.foodName);
+    }
+  }, [initialValues, isOpen]);
 
   if (!isOpen) return null;
 

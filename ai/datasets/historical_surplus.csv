@@ -1,0 +1,26 @@
+day_of_week,category,event_type,prepared_quantity,surplus_quantity,surplus_rate
+Monday,Cooked Meals,Normal,250,38,0.152
+Tuesday,Cooked Meals,Normal,260,32,0.123
+Wednesday,Cooked Meals,Normal,255,35,0.137
+Thursday,Cooked Meals,Corporate Event,350,68,0.194
+Friday,Cooked Meals,Banquet Buffet,450,95,0.211
+Saturday,Cooked Meals,Wedding Banquet,600,140,0.233
+Sunday,Cooked Meals,Brunch,380,72,0.189
+Monday,Bakery,Normal,180,24,0.133
+Tuesday,Bakery,Normal,175,20,0.114
+Wednesday,Bakery,Rainy Day,180,44,0.244
+Thursday,Bakery,Normal,190,26,0.136
+Friday,Bakery,Weekend Prep,240,48,0.200
+Saturday,Bakery,Festival,300,52,0.173
+Sunday,Bakery,Normal,220,38,0.172
+Monday,Fresh Produce,Market Wholesale,800,95,0.118
+Tuesday,Fresh Produce,Market Wholesale,750,82,0.109
+Wednesday,Fresh Produce,Hot Weather,850,145,0.170
+Thursday,Fresh Produce,Normal,780,88,0.112
+Friday,Fresh Produce,Weekend Inflow,1200,210,0.175
+Saturday,Fresh Produce,Weekend Inflow,1400,260,0.185
+Sunday,Fresh Produce,Post-Market,950,165,0.173
+Monday,Dairy,Retail Delivery,200,18,0.090
+Wednesday,Dairy,Cold Storage,250,22,0.088
+Friday,Dairy,Weekend Supply,350,45,0.128
+Saturday,Dairy,Weekend Supply,400,56,0.140

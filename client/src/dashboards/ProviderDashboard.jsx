@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { listingService, requestService } from '../services/api';
 import CreateListingModal from '../components/CreateListingModal';
 import EditListingModal from '../components/EditListingModal';
+import SurplusForecastModal from '../components/SurplusForecastModal';
 import { 
   PackagePlus, 
   Clock, 
@@ -16,7 +17,8 @@ import {
   Sparkles,
   Layers,
   Utensils,
-  Phone
+  Phone,
+  TrendingUp
 } from 'lucide-react';
 
 export default function ProviderDashboard() {
@@ -26,6 +28,8 @@ export default function ProviderDashboard() {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [forecastModalOpen, setForecastModalOpen] = useState(false);
+  const [prefilledListingData, setPrefilledListingData] = useState(null);
   const [editingListing, setEditingListing] = useState(null);
   const [statusMessage, setStatusMessage] = useState(null);
 
@@ -166,13 +170,25 @@ export default function ProviderDashboard() {
               When charities request food portions, an automatic Inventory Lock prevents over-claiming. You can accept requests to schedule pickups or decline to restore stock.
             </p>
           </div>
-          <button 
-            onClick={() => setCreateModalOpen(true)}
-            className="shrink-0 px-6 py-3.5 rounded-xl bg-white hover:bg-emerald-50 text-emerald-900 font-extrabold text-sm shadow-md transition flex items-center gap-2 cursor-pointer"
-          >
-            <PackagePlus className="w-5 h-5 text-emerald-700" />
-            <span>List Surplus Food</span>
-          </button>
+          <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0">
+            <button 
+              onClick={() => setForecastModalOpen(true)}
+              className="w-full sm:w-auto px-5 py-3.5 rounded-xl bg-emerald-900/80 hover:bg-emerald-950 text-white font-extrabold text-sm border border-emerald-600/40 shadow-md transition flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <TrendingUp className="w-5 h-5 text-emerald-300" />
+              <span>AI Surplus Forecast</span>
+            </button>
+            <button 
+              onClick={() => {
+                setPrefilledListingData(null);
+                setCreateModalOpen(true);
+              }}
+              className="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-white hover:bg-emerald-50 text-emerald-900 font-extrabold text-sm shadow-md transition flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <PackagePlus className="w-5 h-5 text-emerald-700" />
+              <span>List Surplus Food</span>
+            </button>
+          </div>
         </div>
 
         {/* Incoming Donation Claims Table */}
@@ -371,8 +387,26 @@ export default function ProviderDashboard() {
         {/* Create Modal */}
         <CreateListingModal
           isOpen={createModalOpen}
-          onClose={() => setCreateModalOpen(false)}
+          initialValues={prefilledListingData}
+          onClose={() => {
+            setCreateModalOpen(false);
+            setPrefilledListingData(null);
+          }}
           onListingCreated={handleListingCreated}
+        />
+
+        {/* AI Surplus Forecast Modal */}
+        <SurplusForecastModal
+          isOpen={forecastModalOpen}
+          onClose={() => setForecastModalOpen(false)}
+          onApplyToCreate={(prediction) => {
+            setPrefilledListingData({
+              category: prediction.category,
+              quantity: prediction.quantity,
+              foodName: `Surplus ${prediction.category} (${new Date().toLocaleDateString('en-US', { weekday: 'short' })})`
+            });
+            setCreateModalOpen(true);
+          }}
         />
 
         {/* Edit Modal */}

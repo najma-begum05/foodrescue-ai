@@ -126,7 +126,7 @@ export const requestService = {
   }
 };
 
-// AI Engine API Wrappers (Module 6)
+// AI Engine API Wrappers (Modules 6, 7, 8)
 export const aiService = {
   getRecommendations: async () => {
     const res = await api.get('/ai/recommendations');
@@ -134,6 +134,14 @@ export const aiService = {
   },
   evaluateMatch: async (listing, ngoCriteria) => {
     const res = await api.post('/ai/evaluate', { listing, ngoCriteria });
+    return res.data;
+  },
+  predictUrgency: async (category, expiryDate, storageCondition = 'Ambient') => {
+    const res = await api.post('/ai/predict-urgency', { category, expiryDate, storageCondition });
+    return res.data;
+  },
+  forecastSurplus: async (preparedQuantity, category, dayOfWeek = 'Friday', eventType = 'normal') => {
+    const res = await api.post('/ai/forecast-surplus', { preparedQuantity, category, dayOfWeek, eventType });
     return res.data;
   }
 };
