@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
+import authRoutes from '../routes/authRoutes.js';
 
 // Load environment variables from .env
 dotenv.config();
@@ -39,16 +40,19 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Mount Routes
+app.use('/api/auth', authRoutes);
+
 // Database connection helper (graceful connection)
 const connectDB = async () => {
   try {
     await mongoose.connect(MONGODB_URI, {
-      serverSelectionTimeoutMS: 3000 // fast timeout if local mongod is not yet running
+      serverSelectionTimeoutMS: 2500
     });
     console.log('✅ MongoDB connected successfully to:', MONGODB_URI);
   } catch (err) {
-    console.warn('⚠️  MongoDB connection notice:', err.message);
-    console.warn('ℹ️  Tip: You can use a free MongoDB Atlas cloud connection string in server/.env, or start your local MongoDB.');
+    console.warn('ℹ️  MongoDB connection notice:', err.message);
+    console.warn('ℹ️  Tip: Running with active in-memory store for instant zero-dependency testing. You can configure a MongoDB Atlas URI in server/.env anytime.');
   }
 };
 
@@ -58,6 +62,7 @@ app.listen(PORT, async () => {
   console.log(`🚀 FoodRescue AI Server listening on port ${PORT}`);
   console.log(`🌐 Base URL: http://localhost:${PORT}`);
   console.log(`🩺 Health Check: http://localhost:${PORT}/api/health`);
+  console.log(`🔐 Auth API: http://localhost:${PORT}/api/auth`);
   console.log(`===============================================`);
   await connectDB();
 });

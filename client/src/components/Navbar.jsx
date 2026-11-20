@@ -1,20 +1,21 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import { 
   Sparkles, 
   Menu, 
   X, 
-  HeartHandshake, 
-  PlusCircle, 
-  Search, 
   LogIn, 
   UserPlus,
-  ShieldCheck
+  LayoutDashboard,
+  LogOut,
+  User
 } from 'lucide-react';
 
 export default function Navbar({ onOpenAuth }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const { user, logout } = useAuth();
 
   const navLinks = [
     { name: 'Home', path: '/' },
@@ -68,20 +69,41 @@ export default function Navbar({ onOpenAuth }) {
 
           {/* Desktop Auth & Action Buttons */}
           <div className="hidden lg:flex items-center space-x-3">
-            <button
-              onClick={() => onOpenAuth('login')}
-              className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:text-emerald-700 hover:bg-slate-100 rounded-xl transition cursor-pointer"
-            >
-              <LogIn className="w-4 h-4" />
-              Sign In
-            </button>
-            <button
-              onClick={() => onOpenAuth('register')}
-              className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-bold text-white bg-emerald-700 hover:bg-emerald-800 active:bg-emerald-900 rounded-xl shadow-md shadow-emerald-700/20 transition cursor-pointer"
-            >
-              <UserPlus className="w-4 h-4" />
-              Join Network
-            </button>
+            {user ? (
+              <div className="flex items-center space-x-2">
+                <Link
+                  to={`/dashboard/${user.role}`}
+                  className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-white bg-emerald-700 hover:bg-emerald-800 rounded-xl shadow-md shadow-emerald-700/20 transition cursor-pointer"
+                >
+                  <LayoutDashboard className="w-4 h-4" />
+                  <span>Dashboard ({user.name.split(' ')[0]})</span>
+                </Link>
+                <button
+                  onClick={logout}
+                  className="p-2.5 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition cursor-pointer"
+                  title="Sign Out"
+                >
+                  <LogOut className="w-4 h-4" />
+                </button>
+              </div>
+            ) : (
+              <>
+                <Link
+                  to="/login"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:text-emerald-700 hover:bg-slate-100 rounded-xl transition cursor-pointer"
+                >
+                  <LogIn className="w-4 h-4" />
+                  Sign In
+                </Link>
+                <Link
+                  to="/register"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-bold text-white bg-emerald-700 hover:bg-emerald-800 active:bg-emerald-900 rounded-xl shadow-md shadow-emerald-700/20 transition cursor-pointer"
+                >
+                  <UserPlus className="w-4 h-4" />
+                  Join Network
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -99,7 +121,7 @@ export default function Navbar({ onOpenAuth }) {
 
       {/* Mobile Dropdown Menu */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-b border-emerald-100 bg-white px-4 pt-2 pb-6 space-y-3 animate-in fade-in slide-in-from-top-4">
+        <div className="md:hidden border-b border-emerald-100 bg-white px-4 pt-2 pb-6 space-y-3">
           <div className="space-y-1">
             {navLinks.map((link) => (
               <Link
@@ -117,27 +139,45 @@ export default function Navbar({ onOpenAuth }) {
             ))}
           </div>
 
-          <div className="pt-3 border-t border-slate-100 grid grid-cols-2 gap-2">
-            <button
-              onClick={() => {
-                setMobileMenuOpen(false);
-                onOpenAuth('login');
-              }}
-              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition"
-            >
-              <LogIn className="w-4 h-4" />
-              Sign In
-            </button>
-            <button
-              onClick={() => {
-                setMobileMenuOpen(false);
-                onOpenAuth('register');
-              }}
-              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-bold text-white bg-emerald-700 hover:bg-emerald-800 rounded-xl shadow-xs transition"
-            >
-              <UserPlus className="w-4 h-4" />
-              Register
-            </button>
+          <div className="pt-3 border-t border-slate-100">
+            {user ? (
+              <div className="space-y-2">
+                <Link
+                  to={`/dashboard/${user.role}`}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-bold text-white bg-emerald-700 rounded-xl shadow-xs"
+                >
+                  <LayoutDashboard className="w-4 h-4" />
+                  Go to Dashboard
+                </Link>
+                <button
+                  onClick={() => { logout(); setMobileMenuOpen(false); }}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2 text-xs font-bold text-rose-700 bg-rose-50 rounded-xl"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Sign Out
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-2">
+                <Link
+                  to="/login"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-slate-700 bg-slate-100 rounded-xl"
+                >
+                  <LogIn className="w-4 h-4" />
+                  Sign In
+                </Link>
+                <Link
+                  to="/register"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-bold text-white bg-emerald-700 rounded-xl shadow-xs"
+                >
+                  <UserPlus className="w-4 h-4" />
+                  Register
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       )}
