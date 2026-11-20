@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '../layouts/DashboardLayout';
 import { useAuth } from '../context/AuthContext';
-import { listingService } from '../services/api';
+import { listingService, requestService } from '../services/api';
 import CreateListingModal from '../components/CreateListingModal';
 import EditListingModal from '../components/EditListingModal';
 import { 
@@ -15,62 +15,52 @@ import {
   RefreshCw,
   Sparkles,
   Layers,
-  Utensils
+  Utensils,
+  Phone
 } from 'lucide-react';
 
 export default function ProviderDashboard() {
   const { user } = useAuth();
 
   const [myListings, setMyListings] = useState([]);
+  const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [editingListing, setEditingListing] = useState(null);
   const [statusMessage, setStatusMessage] = useState(null);
 
-  // Incoming donation requests received by this provider
-  const [requests, setRequests] = useState([
-    {
-      id: 'req-101',
-      listingName: 'Fresh Cooked Banquet Meals (Biryani & Salads)',
-      ngoName: 'Hope Haven Community Kitchen',
-      quantityRequested: '80 meals',
-      urgency: 'CRITICAL',
-      requestTime: '15 mins ago',
-      status: 'pending'
-    },
-    {
-      id: 'req-102',
-      listingName: 'Campus Dining Evening Dinner Surplus',
-      ngoName: 'Sunshine Youth Shelter',
-      quantityRequested: '50 meals',
-      urgency: 'URGENT',
-      requestTime: '1 hour ago',
-      status: 'accepted'
-    }
-  ]);
-
-  const fetchMyListings = async () => {
+  const fetchDashboardData = async () => {
     setLoading(true);
     try {
-      const data = await listingService.getMyListings();
-      if (data.success) {
-        setMyListings(data.listings);
-      }
+      const [listingsRes, requestsRes] = await Promise.all([
+        listingService.getMyListings(),
+        requestService.getIncomingRequests()
+      ]);
+
+      if (listingsRes.success) setMyListings(listingsRes.listings);
+      if (requestsRes.success) setRequests(requestsRes.requests);
     } catch (err) {
-      console.warn('Could not fetch real provider listings:', err.message);
+      console.warn('Dashboard fetch notice:', err.message);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchMyListings();
+    fetchDashboardData();
   }, []);
 
-  const handleRequestAction = (id, newStatus) => {
-    setRequests(requests.map(r => r.id === id ? { ...r, status: newStatus } : r));
-    setStatusMessage(`Request #${id} marked as ${newStatus}`);
-    setTimeout(() => setStatusMessage(null), 3000);
+  const handleRequestAction = async (id, action) => {
+    try {
+      const res = await requestService.respondToRequest(id, action);
+      if (res.success) {
+        setStatusMessage(`Donation claim #${id} ${action}ed! ${action === 'reject' ? 'Inventory lock released back to listing.' : 'Collection window confirmed.'}`);
+        fetchDashboardData();
+        setTimeout(() => setStatusMessage(null), 4000);
+      }
+    } catch (err) {
+      alert('Error updating request: ' + (err.response?.data?.message || err.message));
+    }
   };
 
   const handleDeleteListing = async (id) => {
@@ -89,7 +79,7 @@ export default function ProviderDashboard() {
 
   const handleListingCreated = (newListing) => {
     setMyListings([newListing, ...myListings]);
-    setStatusMessage('New surplus food listing published!');
+    setStatusMessage('New surplus food listing published and broadcasting!');
     setTimeout(() => setStatusMessage(null), 3000);
   };
 
@@ -105,10 +95,11 @@ export default function ProviderDashboard() {
     return hours > 0 ? hours : 0;
   };
 
-  // Metrics
+  // Dynamic Metrics
   const activeCount = myListings.filter(l => l.status === 'Available').length;
   const pendingRequestsCount = requests.filter(r => r.status === 'pending').length;
   const totalPortions = myListings.reduce((acc, curr) => acc + (Number(curr.quantity) || 0), 0);
+  const completedDonationsCount = requests.filter(r => r.status === 'completed' || r.status === 'accepted').length;
 
   return (
     <DashboardLayout 
@@ -137,30 +128,30 @@ export default function ProviderDashboard() {
           </div>
 
           <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Pending Requests</span>
+            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Incoming Requests</span>
             <div className="flex items-baseline justify-between mt-1">
               <h3 className="text-3xl font-black text-amber-600">{pendingRequestsCount}</h3>
-              <span className="text-xs font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md">Action Needed</span>
+              <span className="text-xs font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md">Pending Review</span>
             </div>
             <p className="text-xs text-slate-500 mt-2">Charity claims awaiting confirmation</p>
           </div>
 
           <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Total Available Units</span>
+            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Inventory Reserved</span>
             <div className="flex items-baseline justify-between mt-1">
               <h3 className="text-3xl font-black text-emerald-700">{totalPortions.toLocaleString()}</h3>
               <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md">Portions</span>
             </div>
-            <p className="text-xs text-slate-500 mt-2">Active inventory listed across categories</p>
+            <p className="text-xs text-slate-500 mt-2">Under active multi-recipient protection</p>
           </div>
 
           <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Diverted from Landfill</span>
+            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Fulfilled Donations</span>
             <div className="flex items-baseline justify-between mt-1">
-              <h3 className="text-3xl font-black text-blue-700">1,420 kg</h3>
-              <span className="text-xs font-semibold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md">Verified</span>
+              <h3 className="text-3xl font-black text-blue-700">{completedDonationsCount}</h3>
+              <span className="text-xs font-semibold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md">Completed</span>
             </div>
-            <p className="text-xs text-slate-500 mt-2">≈ 3,550 kg CO₂e emissions prevented</p>
+            <p className="text-xs text-slate-500 mt-2">Successfully routed to local shelters</p>
           </div>
         </div>
 
@@ -168,11 +159,11 @@ export default function ProviderDashboard() {
         <div className="bg-gradient-to-r from-emerald-800 to-teal-800 rounded-3xl p-6 sm:p-8 text-white shadow-lg flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="space-y-2">
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-900/60 text-emerald-300 text-xs font-bold">
-              <Sparkles className="w-3.5 h-3.5" /> Module 3: Food Listing Management Active
+              <Sparkles className="w-3.5 h-3.5" /> Module 5: Real-Time Donation Workflow Active
             </div>
-            <h3 className="text-2xl font-black">Got Unsold Surplus Food Today?</h3>
+            <h3 className="text-2xl font-black">Incoming Charity Claims & Inventory</h3>
             <p className="text-xs sm:text-sm text-emerald-100 max-w-xl leading-relaxed">
-              List surplus items in 60 seconds with strict expiration windows and dietary tags. The AI matching algorithm will broadcast to nearby verified charities immediately.
+              When charities request food portions, an automatic Inventory Lock prevents over-claiming. You can accept requests to schedule pickups or decline to restore stock.
             </p>
           </div>
           <button 
@@ -184,29 +175,110 @@ export default function ProviderDashboard() {
           </button>
         </div>
 
+        {/* Incoming Donation Claims Table */}
+        <div className="bg-white rounded-3xl border border-slate-200 shadow-xs overflow-hidden">
+          <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-bold text-slate-900">Incoming Donation Requests</h3>
+              <p className="text-xs text-slate-500 mt-0.5">Approve claims submitted by verified charity partners to confirm collection</p>
+            </div>
+            <button
+              onClick={fetchDashboardData}
+              className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-lg transition"
+              title="Refresh requests"
+            >
+              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-emerald-700' : ''}`} />
+            </button>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead className="bg-slate-50 text-slate-400 uppercase font-bold text-[10px] tracking-wider border-b border-slate-100">
+                <tr>
+                  <th className="py-3 px-6">Food Item</th>
+                  <th className="py-3 px-6">Requesting Charity</th>
+                  <th className="py-3 px-6">Quantity</th>
+                  <th className="py-3 px-6">Pickup Schedule</th>
+                  <th className="py-3 px-6">Status</th>
+                  <th className="py-3 px-6 text-right">Provider Response</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {requests.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="py-8 text-center text-slate-400">
+                      No incoming donation requests at this time.
+                    </td>
+                  </tr>
+                ) : (
+                  requests.map((r) => (
+                    <tr key={r._id} className="hover:bg-slate-50/50 transition">
+                      <td className="py-4 px-6 font-bold text-slate-900">{r.listingName}</td>
+                      <td className="py-4 px-6">
+                        <p className="text-slate-800 font-semibold">{r.ngoName}</p>
+                        {r.ngoPhone && (
+                          <p className="text-[11px] text-slate-400 flex items-center gap-1 mt-0.5">
+                            <Phone className="w-3 h-3" /> {r.ngoPhone}
+                          </p>
+                        )}
+                      </td>
+                      <td className="py-4 px-6 text-slate-900 font-bold">
+                        {r.quantityRequested} {r.unit}
+                      </td>
+                      <td className="py-4 px-6 text-slate-500">{r.pickupSchedule}</td>
+                      <td className="py-4 px-6">
+                        <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${
+                          r.status === 'accepted' ? 'bg-emerald-100 text-emerald-800' :
+                          r.status === 'completed' ? 'bg-blue-100 text-blue-800' :
+                          r.status === 'rejected' ? 'bg-rose-100 text-rose-800' : 'bg-amber-100 text-amber-800'
+                        }`}>
+                          {r.status}
+                        </span>
+                      </td>
+                      <td className="py-4 px-6 text-right space-x-2">
+                        {r.status === 'pending' ? (
+                          <>
+                            <button
+                              onClick={() => handleRequestAction(r._id, 'accept')}
+                              className="px-3.5 py-1.5 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-xs transition cursor-pointer"
+                            >
+                              Accept
+                            </button>
+                            <button
+                              onClick={() => handleRequestAction(r._id, 'reject')}
+                              className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs transition cursor-pointer"
+                            >
+                              Decline
+                            </button>
+                          </>
+                        ) : (
+                          <span className="text-slate-400 font-semibold text-[11px] uppercase">
+                            {r.status}
+                          </span>
+                        )}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
         {/* Current Active Listings Table */}
         <div className="bg-white rounded-3xl border border-slate-200 shadow-xs overflow-hidden">
           <div className="p-6 border-b border-slate-100 flex items-center justify-between">
             <div>
               <h3 className="text-lg font-bold text-slate-900">Your Food Surplus Listings</h3>
-              <p className="text-xs text-slate-500 mt-0.5">Manage stock availability, edit items, or cancel expired listings</p>
+              <p className="text-xs text-slate-500 mt-0.5">Manage stock availability and edit items</p>
             </div>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={fetchMyListings}
-                className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-lg transition"
-                title="Refresh listings"
-              >
-                <RefreshCw className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => setCreateModalOpen(true)}
-                className="px-3.5 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs flex items-center gap-1.5 shadow-xs cursor-pointer"
-              >
-                <PackagePlus className="w-4 h-4" />
-                <span>New Listing</span>
-              </button>
-            </div>
+            <button
+              onClick={() => setCreateModalOpen(true)}
+              className="px-3.5 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs flex items-center gap-1.5 shadow-xs cursor-pointer"
+            >
+              <PackagePlus className="w-4 h-4" />
+              <span>New Listing</span>
+            </button>
           </div>
 
           <div className="overflow-x-auto">
@@ -215,7 +287,7 @@ export default function ProviderDashboard() {
                 <tr>
                   <th className="py-3 px-6">Food Item</th>
                   <th className="py-3 px-6">Category</th>
-                  <th className="py-3 px-6">Inventory</th>
+                  <th className="py-3 px-6">Available Stock</th>
                   <th className="py-3 px-6">Dietary</th>
                   <th className="py-3 px-6">Expiry Remaining</th>
                   <th className="py-3 px-6">Status</th>
@@ -291,78 +363,6 @@ export default function ProviderDashboard() {
                     );
                   })
                 )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* Incoming Claims Section */}
-        <div className="bg-white rounded-3xl border border-slate-200 shadow-xs overflow-hidden">
-          <div className="p-6 border-b border-slate-100 flex items-center justify-between">
-            <div>
-              <h3 className="text-lg font-bold text-slate-900">Incoming Charity Claims</h3>
-              <p className="text-xs text-slate-500 mt-0.5">Approve donation requests submitted by verified NGOs</p>
-            </div>
-            <span className="text-xs font-semibold text-slate-400">Real-time Claims</span>
-          </div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50 text-slate-400 uppercase font-bold text-[10px] tracking-wider border-b border-slate-100">
-                <tr>
-                  <th className="py-3 px-6">Food Item</th>
-                  <th className="py-3 px-6">Requesting Charity</th>
-                  <th className="py-3 px-6">Portions</th>
-                  <th className="py-3 px-6">Urgency</th>
-                  <th className="py-3 px-6">Request Time</th>
-                  <th className="py-3 px-6">Status</th>
-                  <th className="py-3 px-6 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {requests.map((r) => (
-                  <tr key={r.id} className="hover:bg-slate-50/50 transition">
-                    <td className="py-4 px-6 font-bold text-slate-900">{r.listingName}</td>
-                    <td className="py-4 px-6 text-slate-600 font-semibold">{r.ngoName}</td>
-                    <td className="py-4 px-6 text-slate-900 font-bold">{r.quantityRequested}</td>
-                    <td className="py-4 px-6">
-                      <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${
-                        r.urgency === 'CRITICAL' ? 'bg-rose-100 text-rose-800' : 'bg-amber-100 text-amber-800'
-                      }`}>
-                        {r.urgency}
-                      </span>
-                    </td>
-                    <td className="py-4 px-6 text-slate-400">{r.requestTime}</td>
-                    <td className="py-4 px-6">
-                      <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${
-                        r.status === 'accepted' ? 'bg-emerald-100 text-emerald-800' :
-                        r.status === 'rejected' ? 'bg-rose-100 text-rose-800' : 'bg-amber-100 text-amber-800'
-                      }`}>
-                        {r.status}
-                      </span>
-                    </td>
-                    <td className="py-4 px-6 text-right space-x-2">
-                      {r.status === 'pending' ? (
-                        <>
-                          <button
-                            onClick={() => handleRequestAction(r.id, 'accepted')}
-                            className="px-3 py-1.5 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-xs transition cursor-pointer"
-                          >
-                            Accept
-                          </button>
-                          <button
-                            onClick={() => handleRequestAction(r.id, 'rejected')}
-                            className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs transition cursor-pointer"
-                          >
-                            Decline
-                          </button>
-                        </>
-                      ) : (
-                        <span className="text-slate-400 font-semibold text-[11px]">Processed</span>
-                      )}
-                    </td>
-                  </tr>
-                ))}
               </tbody>
             </table>
           </div>

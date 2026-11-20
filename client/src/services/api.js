@@ -98,4 +98,32 @@ export const listingService = {
   }
 };
 
+// Donation Requests API Wrappers (Module 5)
+export const requestService = {
+  createRequest: async (requestData) => {
+    const res = await api.post('/requests', requestData);
+    return res.data;
+  },
+  getIncomingRequests: async () => {
+    const res = await api.get('/requests/incoming');
+    return res.data;
+  },
+  getOutgoingRequests: async () => {
+    const res = await api.get('/requests/outgoing');
+    return res.data;
+  },
+  respondToRequest: async (id, action, pickupSchedule = '', rejectionReason = '') => {
+    const res = await api.patch(`/requests/${id}/respond`, { action, pickupSchedule, rejectionReason });
+    return res.data;
+  },
+  confirmReceipt: async (id) => {
+    const res = await api.patch(`/requests/${id}/confirm`);
+    return res.data;
+  },
+  cancelRequest: async (id) => {
+    const res = await api.delete(`/requests/${id}/cancel`);
+    return res.data;
+  }
+};
+
 export default api;
