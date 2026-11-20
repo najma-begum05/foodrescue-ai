@@ -6,6 +6,7 @@ import authRoutes from '../routes/authRoutes.js';
 import listingRoutes from '../routes/listingRoutes.js';
 import requestRoutes from '../routes/requestRoutes.js';
 import aiRoutes from '../routes/aiRoutes.js';
+import logisticsRoutes from '../routes/logisticsRoutes.js';
 
 // Load environment variables from .env
 dotenv.config();
@@ -48,6 +49,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/listings', listingRoutes);
 app.use('/api/requests', requestRoutes);
 app.use('/api/ai', aiRoutes);
+app.use('/api/logistics', logisticsRoutes);
 
 // Database connection helper (graceful connection)
 const connectDB = async () => {

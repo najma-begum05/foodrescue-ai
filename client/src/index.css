@@ -1,3 +1,4 @@
+@import "leaflet/dist/leaflet.css";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -12,3 +13,66 @@ body {
   background-color: #f8faf8;
   color: #1e293b;
 }
+
+/* Leaflet Map Custom Marker & Pulse Styles */
+.custom-leaflet-marker {
+  background: transparent;
+  border: none;
+}
+
+.marker-pin-donor {
+  width: 32px;
+  height: 32px;
+  border-radius: 50% 50% 50% 0;
+  background: #059669;
+  position: absolute;
+  transform: rotate(-45deg);
+  left: 50%;
+  top: 50%;
+  margin: -20px 0 0 -16px;
+  box-shadow: 0 4px 10px rgba(5, 150, 105, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #ffffff;
+}
+
+.marker-pin-shelter {
+  width: 32px;
+  height: 32px;
+  border-radius: 50% 50% 50% 0;
+  background: #2563eb;
+  position: absolute;
+  transform: rotate(-45deg);
+  left: 50%;
+  top: 50%;
+  margin: -20px 0 0 -16px;
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #ffffff;
+}
+
+.marker-pin-truck {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #7c3aed;
+  box-shadow: 0 0 0 6px rgba(124, 58, 237, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #ffffff;
+  animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse-ring {
+  0%, 100% {
+    box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(124, 58, 237, 0.1);
+  }
+}
+

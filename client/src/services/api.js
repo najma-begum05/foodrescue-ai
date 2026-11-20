@@ -146,4 +146,24 @@ export const aiService = {
   }
 };
 
+// Logistics & Fleet API Wrappers (Module 9)
+export const logisticsService = {
+  getShipments: async () => {
+    const res = await api.get('/logistics/shipments');
+    return res.data;
+  },
+  getShipmentById: async (id) => {
+    const res = await api.get(`/logistics/shipments/${id}`);
+    return res.data;
+  },
+  updateShipmentStatus: async (id, status, temperatureC = null) => {
+    const res = await api.patch(`/logistics/shipments/${id}/status`, { status, temperatureC });
+    return res.data;
+  },
+  optimizeMultiStopRoute: async () => {
+    const res = await api.post('/logistics/optimize-route');
+    return res.data;
+  }
+};
+
 export default api;
