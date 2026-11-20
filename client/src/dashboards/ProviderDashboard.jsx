@@ -5,6 +5,7 @@ import { listingService, requestService } from '../services/api';
 import CreateListingModal from '../components/CreateListingModal';
 import EditListingModal from '../components/EditListingModal';
 import SurplusForecastModal from '../components/SurplusForecastModal';
+import { MonthlyTrendBarChart, ImpactEquivalencyCard } from '../components/AnalyticsCharts';
 import { 
   PackagePlus, 
   Clock, 
@@ -382,6 +383,12 @@ export default function ProviderDashboard() {
               </tbody>
             </table>
           </div>
+        </div>
+
+        {/* Provider Impact & Donation Velocity Analytics (Module 11) */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <MonthlyTrendBarChart title="Your Monthly Surplus Donated (kg)" />
+          <ImpactEquivalencyCard meals={totalPortions} kgFood={Math.round(totalPortions * 0.4)} />
         </div>
 
         {/* Create Modal */}

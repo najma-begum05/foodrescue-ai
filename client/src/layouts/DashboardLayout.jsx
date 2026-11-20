@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import NotificationCenter from '../components/NotificationCenter';
 import { 
   Sparkles, 
   LayoutDashboard, 
@@ -220,7 +221,10 @@ export default function DashboardLayout({ children, title, subtitle }) {
               </div>
             )}
 
-            {/* User Avatar & Logout */}
+            {/* In-App Notifications Center (Module 10) */}
+            <NotificationCenter />
+
+            {/* User Avatar & Profile */}
             <Link
               to="/profile"
               className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-xs font-semibold text-slate-700"

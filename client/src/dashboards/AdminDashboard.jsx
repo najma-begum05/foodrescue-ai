@@ -3,6 +3,11 @@ import DashboardLayout from '../layouts/DashboardLayout';
 import { useAuth } from '../context/AuthContext';
 import { authService } from '../services/api';
 import { 
+  CategoryDonutChart, 
+  MonthlyTrendBarChart, 
+  ImpactEquivalencyCard 
+} from '../components/AnalyticsCharts';
+import { 
   Users, 
   ShieldCheck, 
   AlertCircle, 
@@ -99,6 +104,15 @@ export default function AdminDashboard() {
             <p className="text-xs text-slate-500 mt-2">Stateless authorization verified</p>
           </div>
         </div>
+
+        {/* Visual Analytics Grid (Module 11) */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <MonthlyTrendBarChart title="System-Wide Monthly Food Rescued (kg)" />
+          <CategoryDonutChart />
+        </div>
+
+        {/* Environmental & Hunger Dividend */}
+        <ImpactEquivalencyCard meals={48250} kgFood={19300} />
 
         {/* Feedback message */}
         {actionMessage && (

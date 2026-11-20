@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import NotificationCenter from './NotificationCenter';
 import { 
   Sparkles, 
   Menu, 
@@ -70,7 +71,8 @@ export default function Navbar({ onOpenAuth }) {
           {/* Desktop Auth & Action Buttons */}
           <div className="hidden lg:flex items-center space-x-3">
             {user ? (
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2.5">
+                <NotificationCenter />
                 <Link
                   to={`/dashboard/${user.role}`}
                   className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-white bg-emerald-700 hover:bg-emerald-800 rounded-xl shadow-md shadow-emerald-700/20 transition cursor-pointer"

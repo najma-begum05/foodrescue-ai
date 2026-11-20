@@ -4,6 +4,10 @@ import { useAuth } from '../context/AuthContext';
 import { requestService, aiService } from '../services/api';
 import AIMatchScoreModal from '../components/AIMatchScoreModal';
 import { 
+  CategoryDonutChart, 
+  WeeklyMealsSparkline 
+} from '../components/AnalyticsCharts';
+import { 
   HeartHandshake, 
   Search, 
   MapPin, 
@@ -353,6 +357,12 @@ export default function NgoDashboard() {
               </tbody>
             </table>
           </div>
+        </div>
+
+        {/* Charity Impact & Nutrition Diversity Analytics (Module 11) */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <WeeklyMealsSparkline />
+          <CategoryDonutChart />
         </div>
 
         {/* AI Match Score Breakdown Modal */}

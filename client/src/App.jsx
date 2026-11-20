@@ -7,6 +7,7 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import AuthModal from './components/AuthModal';
 import ProtectedRoute from './components/ProtectedRoute';
+import RescueBot from './components/RescueBot';
 
 // Public Pages
 import LandingPage from './pages/LandingPage';
@@ -132,6 +133,9 @@ function AppShell() {
         initialMode={authMode}
         initialRole={authRole}
       />
+
+      {/* Global AI Assistant Widget (Module 6 & Support) */}
+      <RescueBot />
     </div>
   );
 }
