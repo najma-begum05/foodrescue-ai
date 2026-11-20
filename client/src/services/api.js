@@ -25,7 +25,6 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && error.response.status === 401) {
-      // If token is invalid or expired, clear local storage
       if (localStorage.getItem('foodrescue_token')) {
         localStorage.removeItem('foodrescue_token');
         localStorage.removeItem('foodrescue_user');
@@ -63,6 +62,38 @@ export const authService = {
   },
   verifyUser: async (id, status) => {
     const res = await api.put(`/auth/verify-user/${id}`, { status });
+    return res.data;
+  }
+};
+
+// Food Listings API Wrappers (Module 3)
+export const listingService = {
+  getAllListings: async (params = {}) => {
+    const res = await api.get('/listings', { params });
+    return res.data;
+  },
+  getMyListings: async () => {
+    const res = await api.get('/listings/my/all');
+    return res.data;
+  },
+  getListingById: async (id) => {
+    const res = await api.get(`/listings/${id}`);
+    return res.data;
+  },
+  createListing: async (listingData) => {
+    const res = await api.post('/listings', listingData);
+    return res.data;
+  },
+  updateListing: async (id, updates) => {
+    const res = await api.put(`/listings/${id}`, updates);
+    return res.data;
+  },
+  deleteListing: async (id) => {
+    const res = await api.delete(`/listings/${id}`);
+    return res.data;
+  },
+  updateStatus: async (id, status) => {
+    const res = await api.patch(`/listings/${id}/status`, { status });
     return res.data;
   }
 };

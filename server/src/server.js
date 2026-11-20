@@ -3,6 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import authRoutes from '../routes/authRoutes.js';
+import listingRoutes from '../routes/listingRoutes.js';
 
 // Load environment variables from .env
 dotenv.config();
@@ -42,6 +43,7 @@ app.get('/api/health', (req, res) => {
 
 // Mount Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/listings', listingRoutes);
 
 // Database connection helper (graceful connection)
 const connectDB = async () => {
@@ -63,6 +65,7 @@ app.listen(PORT, async () => {
   console.log(`🌐 Base URL: http://localhost:${PORT}`);
   console.log(`🩺 Health Check: http://localhost:${PORT}/api/health`);
   console.log(`🔐 Auth API: http://localhost:${PORT}/api/auth`);
+  console.log(`🍲 Listings API: http://localhost:${PORT}/api/listings`);
   console.log(`===============================================`);
   await connectDB();
 });
