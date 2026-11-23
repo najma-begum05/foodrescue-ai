@@ -118,6 +118,9 @@ export default function NotificationCenter() {
       {/* Bell Button */}
       <button
         onClick={() => setOpen(!open)}
+        aria-expanded={open}
+        aria-haspopup="true"
+        aria-label={`Notifications, ${unreadCount} unread`}
         className="relative p-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 transition cursor-pointer flex items-center justify-center"
         title="Notifications"
       >

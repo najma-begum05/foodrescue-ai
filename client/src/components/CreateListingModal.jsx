@@ -47,6 +47,17 @@ export default function CreateListingModal({ isOpen, onClose, onListingCreated, 
     }
   }, [initialValues, isOpen]);
 
+  // Accessibility: Close on Escape key press
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   // Auto-adjust default storage and foodType based on category
@@ -119,12 +130,18 @@ export default function CreateListingModal({ isOpen, onClose, onListingCreated, 
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-      <div className="relative bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl border border-slate-100 animate-in fade-in zoom-in-95 duration-200 max-h-[92vh] overflow-y-auto">
+      <div 
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="create-listing-title"
+        className="relative bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl border border-slate-100 animate-in fade-in zoom-in-95 duration-200 max-h-[92vh] overflow-y-auto"
+      >
         
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 p-2 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition"
+          aria-label="Close surplus listing dialog"
+          className="absolute top-5 right-5 p-2 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer"
         >
           <X className="w-5 h-5" />
         </button>
@@ -134,7 +151,7 @@ export default function CreateListingModal({ isOpen, onClose, onListingCreated, 
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 text-xs font-bold mb-2">
             <Sparkles className="w-3.5 h-3.5 text-emerald-600" /> Module 3: Surplus Listing Engine
           </div>
-          <h3 className="text-2xl font-black text-slate-900 tracking-tight">
+          <h3 id="create-listing-title" className="text-2xl font-black text-slate-900 tracking-tight">
             Create Food Surplus Listing
           </h3>
           <p className="text-xs text-slate-500 mt-1">

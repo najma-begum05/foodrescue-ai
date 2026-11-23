@@ -161,6 +161,7 @@ You can ask me about:
         {!isOpen && (
           <button
             onClick={() => setIsOpen(true)}
+            aria-label="Open RescueBot AI conversational assistant"
             className="group px-4 py-3.5 rounded-full bg-gradient-to-r from-emerald-700 to-teal-800 text-white font-extrabold text-sm shadow-xl hover:shadow-2xl hover:scale-105 transition flex items-center gap-2.5 cursor-pointer border border-emerald-500/30"
           >
             <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center">
@@ -174,7 +175,11 @@ You can ask me about:
 
       {/* Floating Chat Modal */}
       {isOpen && (
-        <div className="fixed bottom-6 right-6 z-50 w-[92vw] sm:w-[420px] h-[580px] bg-white rounded-3xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+        <section 
+          role="region"
+          aria-label="RescueBot AI Chat Assistant"
+          className="fixed bottom-6 right-6 z-50 w-[92vw] sm:w-[420px] h-[580px] bg-white rounded-3xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200"
+        >
           
           {/* Header */}
           <div className="p-4 bg-gradient-to-r from-emerald-800 to-teal-800 text-white flex items-center justify-between shadow-xs">
@@ -193,6 +198,7 @@ You can ask me about:
 
             <button
               onClick={() => setIsOpen(false)}
+              aria-label="Close RescueBot AI chat"
               className="p-1.5 rounded-full text-white/80 hover:text-white hover:bg-white/10 transition cursor-pointer"
             >
               <X className="w-5 h-5" />
@@ -273,7 +279,7 @@ You can ask me about:
             </button>
           </form>
 
-        </div>
+        </section>
       )}
     </>
   );

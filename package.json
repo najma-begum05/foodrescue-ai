@@ -1,0 +1,27 @@
+{
+  "name": "foodrescue-ai",
+  "version": "1.0.0",
+  "description": "Intelligent Food Surplus Management and Redistribution Platform",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node tests/in_process_test_suite.js",
+    "test:evaluation": "node tests/evaluation_matrix_test.js",
+    "dev": "npm --prefix server run dev",
+    "dev:client": "npm --prefix client run dev",
+    "build": "npm --prefix client run build",
+    "start": "npm --prefix server run start"
+  },
+  "keywords": [
+    "food-rescue",
+    "ai",
+    "sustainability",
+    "logistics",
+    "food-security",
+    "fssai",
+    "leaflet",
+    "mern"
+  ],
+  "author": "FoodRescue AI Team",
+  "license": "MIT"
+}

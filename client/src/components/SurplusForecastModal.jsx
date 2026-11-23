@@ -24,6 +24,17 @@ export default function SurplusForecastModal({ isOpen, onClose, onApplyToCreate 
   const [loading, setLoading] = useState(false);
   const [forecastResult, setForecastResult] = useState(null);
 
+  // Accessibility: Close on Escape key
+  React.useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   const handlePredict = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -47,11 +58,17 @@ export default function SurplusForecastModal({ isOpen, onClose, onApplyToCreate 
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-      <div className="relative bg-white rounded-3xl max-w-xl w-full p-6 sm:p-8 shadow-2xl border border-slate-100 animate-in fade-in zoom-in-95 duration-200">
+      <div 
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="forecast-modal-title"
+        className="relative bg-white rounded-3xl max-w-xl w-full p-6 sm:p-8 shadow-2xl border border-slate-100 animate-in fade-in zoom-in-95 duration-200"
+      >
         
         {/* Close Button */}
         <button
           onClick={onClose}
+          aria-label="Close surplus forecasting dialog"
           className="absolute top-5 right-5 p-2 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer"
         >
           <X className="w-5 h-5" />
@@ -62,7 +79,7 @@ export default function SurplusForecastModal({ isOpen, onClose, onApplyToCreate 
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-50 text-purple-800 text-xs font-bold mb-2">
             <Sparkles className="w-3.5 h-3.5 text-purple-600" /> Module 8: AI Surplus Forecasting Model
           </div>
-          <h3 className="text-2xl font-black text-slate-900 tracking-tight">
+          <h3 id="forecast-modal-title" className="text-2xl font-black text-slate-900 tracking-tight">
             Predict End-of-Day Food Surplus
           </h3>
           <p className="text-xs text-slate-500 mt-1">
