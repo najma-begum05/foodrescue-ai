@@ -5,7 +5,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node tests/in_process_test_suite.js",
+    "test": "node tests/in_process_test_suite.js && node tests/evaluation_matrix_test.js",
+    "test:unit": "node tests/in_process_test_suite.js",
     "test:evaluation": "node tests/evaluation_matrix_test.js",
     "dev": "npm --prefix server run dev",
     "dev:client": "npm --prefix client run dev",

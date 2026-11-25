@@ -1,7 +1,9 @@
+
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import helmet from 'helmet';
+import compression from 'compression';
 import rateLimit from 'express-rate-limit';
 import mongoose from 'mongoose';
 import authRoutes from '../routes/authRoutes.js';
@@ -22,6 +24,9 @@ app.use(helmet({
   contentSecurityPolicy: false, // Allow Leaflet tile CDN in dev/production
   crossOriginEmbedderPolicy: false
 }));
+
+// HTTP Response Compression (Gzip / Deflate for Efficiency)
+app.use(compression());
 
 // CORS Configuration
 app.use(cors({

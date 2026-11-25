@@ -8,6 +8,7 @@ import Footer from './components/Footer';
 import AuthModal from './components/AuthModal';
 import ProtectedRoute from './components/ProtectedRoute';
 import RescueBot from './components/RescueBot';
+import ErrorBoundary from './components/ErrorBoundary';
 
 // Lazy-Loaded Route Components for Optimized Bundle Code Splitting (Efficiency)
 const LandingPage = lazy(() => import('./pages/LandingPage'));
@@ -169,10 +170,12 @@ function AppShell() {
 
 export default function App() {
   return (
-    <Router>
-      <AuthProvider>
-        <AppShell />
-      </AuthProvider>
-    </Router>
+    <ErrorBoundary>
+      <Router>
+        <AuthProvider>
+          <AppShell />
+        </AuthProvider>
+      </Router>
+    </ErrorBoundary>
   );
 }
