@@ -100,7 +100,11 @@ npm run dev
 ```
 Open [http://localhost:5173](http://localhost:5173) in your browser.
 
-### 4. Running Automated Integration Tests
+### 4. Deploying on Render
+
+The root `render.yaml` Blueprint provisions the API and frontend. After syncing it, set `MONGODB_URI` on the API service to a MongoDB Atlas connection string for persistent data. Confirm `CLIENT_URL` on the API and `VITE_API_BASE_URL` on the frontend match the actual Render service URLs; changing the frontend variable requires a new frontend build/deploy.
+
+### 5. Running Automated Integration Tests
 ```bash
 node tests/in_process_test_suite.js
 ```

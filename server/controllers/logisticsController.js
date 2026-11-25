@@ -324,25 +324,42 @@ export const optimizeMultiStopRoute = async (req, res) => {
     return new Promise((resolve) => {
       // Try executing Python route optimizer
       const pythonScript = path.resolve(__dirname, '../../ai/logistics/route_optimizer.py');
-      const py = spawn('python', [pythonScript, '--json', JSON.stringify(stops)]);
+      const py = spawn('python3', [pythonScript, '--json', JSON.stringify(stops)]);
 
       let stdout = '';
       let stderr = '';
+      let responseSent = false;
+
+      const sendResponse = (result) => {
+        if (responseSent) return;
+        responseSent = true;
+        res.json(result);
+        resolve();
+      };
 
       py.stdout.on('data', data => { stdout += data.toString(); });
       py.stderr.on('data', data => { stderr += data.toString(); });
+
+      py.on('error', err => {
+        console.error('Unable to start Python route optimizer:', err.message);
+        sendFallback();
+      });
 
       py.on('close', code => {
         if (code === 0 && stdout.trim()) {
           try {
             const parsed = JSON.parse(stdout);
-            res.json(parsed);
-            return resolve();
+            sendResponse(parsed);
+            return;
           } catch {
             // Fall through to js fallback
           }
         }
 
+        sendFallback();
+      });
+
+      function sendFallback() {
         // JS Heuristic Fallback
         let currentLat = 17.4156;
         let currentLon = 78.4357;
@@ -364,7 +381,7 @@ export const optimizeMultiStopRoute = async (req, res) => {
         const distSaved = Math.max(0, Math.round((baselineDist - totalDist) * 10) / 10);
         const co2Saved = Math.round(distSaved * 0.192 * 10) / 10;
 
-        res.json({
+        sendResponse({
           success: true,
           stopCount: sequence.length,
           optimizedSequence: sequence,
@@ -375,8 +392,7 @@ export const optimizeMultiStopRoute = async (req, res) => {
           co2SavedKg: co2Saved,
           recommendation: `Optimized multi-stop circuit visiting ${sequence.length} food locations. High urgency hot meals prioritized first.`
         });
-        resolve();
-      });
+      }
     });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });

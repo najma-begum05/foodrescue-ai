@@ -141,7 +141,7 @@ const connectDB = async () => {
 
 // Start Server if run directly
 if (process.env.NODE_ENV !== 'test') {
-  app.listen(PORT, '127.0.0.1', async () => {
+  app.listen(PORT, '0.0.0.0', async () => {
     console.log(`===============================================`);
     console.log(`🚀 FoodRescue AI Server listening on port ${PORT}`);
     console.log(`🌐 Base URL: http://localhost:${PORT}`);
