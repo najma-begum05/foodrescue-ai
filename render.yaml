@@ -18,8 +18,9 @@ services:
       - key: CLIENT_URL
         value: https://foodrescue-ai.vercel.app
 
+ 
   # Frontend Web Client
-  - type: static
+- type: static_site
     name: foodrescue-client
     buildCommand: cd client && npm install && npm run build
     staticPublishPath: client/dist
